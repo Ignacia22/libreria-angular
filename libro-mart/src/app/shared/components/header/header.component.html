@@ -1,0 +1,33 @@
+<header class="main-header">
+    <div class="header-container">
+    <!-- Logo -->
+    <div class="logo">
+      <a routerLink="/books">
+        <h1>📚 LibroMart</h1>
+      </a>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="main-nav">
+      <a routerLink="/books" routerLinkActive="active">Catálogo</a>
+      <a routerLink="/cart" routerLinkActive="active">
+        Carrito 
+        <span class="cart-badge" *ngIf="(cartItemCount$ | async) as count">
+          {{ count }}
+        </span>
+      </a>
+    </nav>
+
+    <!-- Usuario -->
+    <div class="user-section">
+      <div *ngIf="isLoggedIn$ | async; else loginSection" class="logged-in">
+        <span>¡Hola, {{ userName$ | async }}!</span>
+        <button (click)="logout()" class="btn-secondary">Salir</button>
+      </div>
+      
+      <ng-template #loginSection>
+        <button (click)="login()" class="btn-primary">Iniciar Sesión</button>
+      </ng-template>
+    </div>
+    </div>
+</header>

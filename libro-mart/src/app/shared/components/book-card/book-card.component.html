@@ -1,0 +1,55 @@
+<div class="book-card">
+    <!-- Imagen del libro -->
+  <div class="book-image">
+    <img [src]="getImageUrl()" [alt]="book.title" (error)="$event.target.src='https://via.placeholder.com/128x196?text=Sin+Imagen'">
+    
+    <!-- Badge de calificación -->
+    <div class="rating-badge" *ngIf="getRating() > 0">
+      <span class="rating-number">{{ getRating() | number:'1.1-1' }}</span>
+      <div class="stars">
+        <span *ngFor="let star of getStars()" [class.filled]="star">★</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información del libro -->
+  <div class="book-info">
+    <h3 class="book-title" [title]="book.title">{{ book.title }}</h3>
+    <p class="book-authors">{{ getAuthors() }}</p>
+    
+    <!-- Categorías -->
+    <div class="book-categories" *ngIf="book.categories && book.categories.length > 0">
+      <span class="category" *ngFor="let category of book.categories.slice(0, 2)">
+        {{ category }}
+      </span>
+    </div>
+
+    <!-- Precio -->
+    <div class="book-price">
+      <span class="price">${{ getPrice() | number:'1.2-2' }}</span>
+      <span class="currency">{{ getCurrency() }}</span>
+    </div>
+
+    <!-- Descripción truncada -->
+    <p class="book-description" *ngIf="book.description">
+      {{ book.description.length > 100 ? (book.description | slice:0:100) + '...' : book.description }}
+    </p>
+  </div>
+
+  <!-- Acciones -->
+  <div class="book-actions">
+    <button 
+      class="btn-view-details" 
+      [routerLink]="['/books', book.id]">
+      Ver Detalles
+    </button>
+    
+    <button 
+      class="btn-add-cart" 
+      [class.in-cart]="isInCart()"
+      (click)="addToCart()"
+      [disabled]="isInCart()">
+      {{ isInCart() ? '✓ En Carrito' : '🛒 Agregar' }}
+    </button>
+  </div>
+</div>
