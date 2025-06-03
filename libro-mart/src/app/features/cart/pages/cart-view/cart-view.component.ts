@@ -90,22 +90,31 @@ export class CartViewComponent {
   }
 
   getShipping(): number {
-    // Envío gratis si la compra es mayor a $50
-    return this.cart.total > 50 ? 0 : 5.99;
+    return this.cartService.getShippingCost(this.getSubtotal());
   }
 
   getTax(): number {
-    // Impuesto del 8%
-    return this.cart.total * 0.08;
+    // IVA del 19% ya incluido en precios chilenos
+    return 0; // No mostrar IVA por separado
   }
 
   getTotal(): number {
-    return this.getSubtotal() + this.getShipping() + this.getTax();
+    return this.getSubtotal() + this.getShipping();
   }
 
   trackByItemId(index: number, item: any): string {
   return item.book.id;
-}
+  }
+
+  // ✅ NUEVO: Obtener cuánto falta para envío gratis
+  getAmountForFreeShipping(): number {
+    return this.cartService.getAmountForFreeShipping(this.getSubtotal());
+  }
+
+  // ✅ NUEVO: Verificar si califica para envío gratis
+  qualifiesForFreeShipping(): boolean {
+    return this.cartService.qualifiesForFreeShipping(this.getSubtotal());
+  }
 
   getFormattedDate(): string {
     return this.cart.updatedAt.toLocaleDateString('es-ES', {

@@ -8,6 +8,7 @@ import { BookService } from '../../../../core/services/book.service';
 import { CartService } from '../../../../core/services/cart.service';
 import { WriteReviewComponent } from '../../components/write-review/write-review.component';
 import { BookReviewsComponent } from '../../components/book-reviews/book-reviews.component';
+import { PriceService } from '../../../../core/services/price.service';
 
 @Component({
   selector: 'app-book-detail',
@@ -38,7 +39,8 @@ export class BookDetailComponent {
     private route: ActivatedRoute,
     private router: Router,
     private bookService: BookService,
-    private cartService: CartService
+    private cartService: CartService,
+    private priceService: PriceService
   ) {}
 
   ngOnInit(): void {
@@ -138,8 +140,8 @@ export class BookDetailComponent {
   }
 
   getPrice(): number {
-    if (!this.book) return 0;
-    return this.book.retailPrice?.amount || this.book.listPrice?.amount || 15.99;
+  if (!this.book) return 0;
+  return this.priceService.getBookPrice(this.book); 
   }
 
   getCurrency(): string {

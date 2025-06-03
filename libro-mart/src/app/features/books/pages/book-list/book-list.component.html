@@ -65,5 +65,75 @@
         [book]="book">
       </app-book-card>
     </div>
+
+    <!-- ✅ PAGINACIÓN - NUEVA SECCIÓN -->
+    <div *ngIf="totalPages > 1 && !loading" class="pagination-section">
+      <div class="pagination-info">
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <span class="total-items">({{ totalItems }} libros en total)</span>
+      </div>
+      
+      <div class="pagination-controls">
+        <!-- Primera página -->
+        <button 
+          (click)="onPageChange(1)" 
+          [disabled]="currentPage === 1"
+          class="pagination-btn"
+          title="Primera página">
+          ⏮️
+        </button>
+        
+        <!-- Página anterior -->
+        <button 
+          (click)="onPageChange(currentPage - 1)" 
+          [disabled]="!hasPrevPage"
+          class="pagination-btn"
+          title="Página anterior">
+          ◀️
+        </button>
+        
+        <!-- Números de página -->
+        <div class="page-numbers">
+          <button 
+            *ngFor="let page of getPageNumbers()" 
+            (click)="onPageChange(page)"
+            [class.active]="page === currentPage"
+            class="page-btn">
+            {{ page }}
+          </button>
+        </div>
+        
+        <!-- Página siguiente -->
+        <button 
+          (click)="onPageChange(currentPage + 1)" 
+          [disabled]="!hasNextPage"
+          class="pagination-btn"
+          title="Página siguiente">
+          ▶️
+        </button>
+        
+        <!-- Última página -->
+        <button 
+          (click)="onPageChange(totalPages)" 
+          [disabled]="currentPage === totalPages"
+          class="pagination-btn"
+          title="Última página">
+          ⏭️
+        </button>
+      </div>
+
+      <!-- Salto rápido a página -->
+      <div class="quick-jump" *ngIf="totalPages > 10">
+        <label>Ir a página:</label>
+        <input 
+          type="number" 
+          [min]="1" 
+          [max]="totalPages"
+          [(ngModel)]="currentPage"
+          (keyup.enter)="onPageChange(currentPage)"
+          class="page-input">
+        <button (click)="onPageChange(currentPage)" class="btn-go">Ir</button>
+      </div>
+    </div>
   </div>
 </div>
