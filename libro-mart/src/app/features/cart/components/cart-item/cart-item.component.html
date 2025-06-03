@@ -1,1 +1,38 @@
-<p>cart-item works!</p>
+<div class="cart-item">
+    <div class="item-image">
+    <img [src]="getImageUrl()" [alt]="item.book.title">
+  </div>
+
+  <div class="item-details">
+    <h3 class="item-title">{{ item.book.title }}</h3>
+    <p class="item-authors">{{ getAuthors() }}</p>
+    <p class="item-price">${{ getPrice() | number:'1.2-2' }}</p>
+  </div>
+
+  <div class="item-quantity">
+    <label>Cantidad:</label>
+    <div class="quantity-controls">
+      <button 
+        (click)="updateQuantity(item.quantity - 1)"
+        [disabled]="item.quantity <= 1"
+        class="qty-btn">-</button>
+      
+      <span class="quantity">{{ item.quantity }}</span>
+      
+      <button 
+        (click)="updateQuantity(item.quantity + 1)"
+        class="qty-btn">+</button>
+    </div>
+  </div>
+
+  <div class="item-subtotal">
+    <p class="subtotal-label">Subtotal:</p>
+    <p class="subtotal-amount">${{ getSubtotal() | number:'1.2-2' }}</p>
+  </div>
+
+  <div class="item-actions">
+    <button (click)="removeItem()" class="btn-remove" title="Eliminar">
+      🗑️
+    </button>
+  </div>
+</div>

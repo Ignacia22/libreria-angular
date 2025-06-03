@@ -1,1 +1,69 @@
-<p>book-list works!</p>
+<div class="book-list-container">
+  <!-- Header de búsqueda -->
+  <div class="search-header">
+    <div class="search-section">
+      <h1>📚 Catálogo de Libros</h1>
+      <p>Descubre tu próxima gran lectura</p>
+      
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange(searchTerm)"
+          placeholder="Buscar por título, autor, ISBN..."
+          class="search-input">
+        
+        <button 
+          *ngIf="searchTerm" 
+          (click)="clearSearch()" 
+          class="clear-search">
+          ✕
+        </button>
+      </div>
+
+      <!-- Filtro por categoría -->
+      <div class="category-filter">
+        <label for="category">Categoría:</label>
+        <select 
+          id="category"
+          [(ngModel)]="selectedCategory" 
+          (change)="onCategoryChange()"
+          class="category-select">
+          <option *ngFor="let category of categories" [value]="category.value">
+            {{ category.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="results-section">
+    <div class="results-header">
+      <h2>{{ getResultsText() }}</h2>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-section">
+      <div class="spinner"></div>
+      <p>Cargando libros...</p>
+    </div>
+
+    <!-- No results -->
+    <div *ngIf="noResults && !loading" class="no-results">
+      <div class="no-results-icon">📚</div>
+      <h3>No se encontraron libros</h3>
+      <p>Intenta con otros términos de búsqueda o explora nuestras categorías</p>
+      <button (click)="clearSearch()" class="btn-primary">Ver libros populares</button>
+    </div>
+
+    <!-- Grid de libros -->
+    <div *ngIf="books.length > 0 && !loading" class="books-grid">
+      <app-book-card 
+        *ngFor="let book of books; trackBy: trackByBookId" 
+        [book]="book">
+      </app-book-card>
+    </div>
+  </div>
+</div>

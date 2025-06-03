@@ -1,0 +1,142 @@
+<div class="reviews-container">
+  
+  <!-- Resumen de reseñas -->
+  <div class="reviews-summary">
+    <div class="summary-header">
+      <h3>📝 Reseñas de Clientes</h3>
+      <div *ngIf="hasReviews" class="overall-rating">
+        <div class="average-stars">
+          <span *ngFor="let star of getStars(getRoundedAverageRating())" class="star filled">★</span>
+          <span *ngFor="let star of getEmptyStars(getRoundedAverageRating())" class="star empty">★</span>
+        </div>
+        <span class="average-number">{{ reviewSummary.averageRating | number:'1.1-1' }}</span>
+        <span class="total-reviews">basado en {{ reviewSummary.totalReviews }} reseñas</span>
+      </div>
+    </div>
+
+    <!-- Distribución de calificaciones -->
+    <div *ngIf="hasReviews" class="rating-distribution">
+      <div *ngFor="let rating of [5,4,3,2,1]" class="rating-bar">
+        <span class="rating-label">{{ rating }} ★</span>
+        <div class="bar-container">
+          <div 
+            class="bar-fill" 
+            [style.width.%]="getPercentage(getRatingCount(rating), reviewSummary.totalReviews)">
+          </div>
+        </div>
+        <span class="rating-count">{{ getRatingCount(rating) }}</span>
+      </div>
+    </div>
+
+    <!-- Sin reseñas -->
+    <div *ngIf="!hasReviews" class="no-reviews-summary">
+      <p>Este libro aún no tiene reseñas. ¡Sé el primero en escribir una!</p>
+    </div>
+  </div>
+
+  <!-- Filtros y ordenamiento -->
+  <div *ngIf="hasReviews" class="reviews-controls">
+    <div class="controls-row">
+      <div class="filter-group">
+        <label>Filtrar por:</label>
+        <select [(ngModel)]="filterRating" (change)="onFilterChange()" class="filter-select">
+          <option value="all">Todas las calificaciones</option>
+          <option *ngFor="let rating of [5,4,3,2,1]" [value]="rating">
+            {{ getFilterLabel(rating) }} ({{ getRatingCount(rating) }})
+          </option>
+        </select>
+      </div>
+
+      <div class="sort-group">
+        <label>Ordenar por:</label>
+        <select [(ngModel)]="sortBy" (change)="onSortChange()" class="sort-select">
+          <option value="newest">Más recientes</option>
+          <option value="oldest">Más antiguas</option>
+          <option value="highest">Mejor calificadas</option>
+          <option value="lowest">Peor calificadas</option>
+          <option value="helpful">Más útiles</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results-info">
+      Mostrando {{ paginatedReviews.length }} de {{ filteredReviews.length }} reseñas
+    </div>
+  </div>
+
+  <!-- Lista de reseñas -->
+  <div class="reviews-list">
+    
+    <!-- Sin reseñas filtradas -->
+    <div *ngIf="hasReviews && filteredReviews.length === 0" class="no-filtered-reviews">
+      <p>No hay reseñas que coincidan con los filtros seleccionados.</p>
+      <button (click)="filterRating = 'all'; onFilterChange()" class="btn-clear-filters">
+        Limpiar filtros
+      </button>
+    </div>
+
+    <!-- Reseñas individuales -->
+    <div *ngFor="let review of paginatedReviews" class="review-item">
+      <div class="review-header">
+        <div class="user-info">
+          <img [src]="review.userAvatar" [alt]="review.userName" class="user-avatar">
+          <div class="user-details">
+            <div class="user-name">{{ review.userName }}</div>
+            <div class="user-badges">
+              <span *ngIf="review.verifiedPurchase" class="verified-badge">✅ Compra verificada</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="review-meta">
+          <div class="review-rating">
+            <span *ngFor="let star of getStars(getRoundedAverageRating())" class="star filled">★</span>
+            <span *ngFor="let star of getEmptyStars(getRoundedAverageRating())" class="star empty">★</span>
+          </div>
+          <div class="review-date">{{ getRelativeTime(review.date) }}</div>
+        </div>
+      </div>
+
+      <div class="review-content">
+        <h4 class="review-title">{{ review.title }}</h4>
+        <p class="review-text">{{ review.content }}</p>
+      </div>
+
+      <div class="review-actions">
+        <button 
+          *ngIf="canMarkHelpful(review)"
+          (click)="markAsHelpful(review.id)" 
+          class="btn-helpful">
+          👍 Útil ({{ review.helpful }})
+        </button>
+        
+        <span *ngIf="!canMarkHelpful(review)" class="helpful-count">
+          👍 {{ review.helpful }} personas encontraron esto útil
+        </span>
+        
+        <span class="review-full-date">{{ formatDate(review.date) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button 
+      (click)="changePage(currentPage - 1)" 
+      [disabled]="currentPage === 1"
+      class="pagination-btn">
+      ← Anterior
+    </button>
+    
+    <span class="pagination-info">
+      Página {{ currentPage }} de {{ totalPages }}
+    </span>
+    
+    <button 
+      (click)="changePage(currentPage + 1)" 
+      [disabled]="currentPage === totalPages"
+      class="pagination-btn">
+      Siguiente →
+    </button>
+  </div>
+</div>

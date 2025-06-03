@@ -1,7 +1,7 @@
 <div class="book-card">
     <!-- Imagen del libro -->
   <div class="book-image">
-    <img [src]="getImageUrl()" [alt]="book.title" (error)="$event.target.src='https://via.placeholder.com/128x196?text=Sin+Imagen'">
+    <img [src]="getImageUrl()" [alt]="book.title" (error)="onImageError($event)">
     
     <!-- Badge de calificación -->
     <div class="rating-badge" *ngIf="getRating() > 0">
