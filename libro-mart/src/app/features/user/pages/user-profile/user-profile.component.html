@@ -1,0 +1,234 @@
+<div class="profile-container">
+  
+  <!-- Header del perfil -->
+  <div class="profile-header">
+    <!-- Cover editable -->
+    <div class="profile-cover" [style.background-image]="getCoverBackground()">
+      <div class="cover-overlay">
+        <button class="edit-cover-btn" (click)="editCover()">
+          🖼️ Cambiar portada
+        </button>
+      </div>
+      <input 
+        type="file" 
+        #coverInput 
+        (change)="onCoverChange($event)" 
+        accept="image/*" 
+        style="display: none;">
+    </div>
+    
+    <div class="profile-info">
+      <!-- Avatar editable -->
+      <div class="avatar-section">
+        <div class="avatar-container">
+          <img 
+            [src]="getAvatarUrl()" 
+            [alt]="user?.name || 'Usuario'" 
+            class="profile-avatar"
+            (error)="onAvatarError($event)">
+          <div class="avatar-overlay" (click)="editAvatar()">
+            <span class="edit-avatar-btn">📷</span>
+          </div>
+        </div>
+        <input 
+          type="file" 
+          #avatarInput 
+          (change)="onAvatarChange($event)" 
+          accept="image/*" 
+          style="display: none;">
+        
+        <!-- Opciones de avatar -->
+        <div class="avatar-options" *ngIf="showAvatarOptions">
+          <button (click)="generateRandomAvatar()" class="avatar-option-btn">
+            🎲 Avatar aleatorio
+          </button>
+          <button (click)="selectAvatarFile()" class="avatar-option-btn">
+            📁 Subir imagen
+          </button>
+          <button (click)="removeAvatar()" class="avatar-option-btn danger">
+            🗑️ Quitar imagen
+          </button>
+        </div>
+      </div>
+      
+      <div class="user-details">
+        <h1 class="user-name">{{ user?.name || 'Usuario' }}</h1>
+        <p class="user-email">{{ user?.email || 'email@ejemplo.com' }}</p>
+        <p class="join-date">Miembro desde {{ formatDate(user?.joinDate) }}</p>
+        
+        <!-- Estadísticas rápidas -->
+        <div class="quick-stats">
+          <div class="stat">
+            <span class="stat-number">{{ getFavoritesCount() }}</span>
+            <span class="stat-label">Favoritos</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">{{ getJoinedDays() }}</span>
+            <span class="stat-label">Días activo</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">{{ getReadingGoalProgress() | number:'1.0-0' }}%</span>
+            <span class="stat-label">Meta de lectura</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación por pestañas -->
+  <div class="profile-nav">
+    <button 
+      (click)="setActiveTab('overview')" 
+      [class.active]="activeTab === 'overview'"
+      class="nav-btn">
+      📊 Resumen
+    </button>
+    
+    <button 
+      (click)="setActiveTab('favorites')" 
+      [class.active]="activeTab === 'favorites'"
+      class="nav-btn">
+      ❤️ Favoritos ({{ getFavoritesCount() }})
+    </button>
+    
+    <button 
+      (click)="setActiveTab('reading')" 
+      [class.active]="activeTab === 'reading'"
+      class="nav-btn">
+      📚 Lectura
+    </button>
+    
+    <button 
+      (click)="setActiveTab('edit')" 
+      [class.active]="activeTab === 'edit'"
+      class="nav-btn">
+      ⚙️ Editar Perfil
+    </button>
+  </div>
+
+  <!-- Contenido de las pestañas -->
+  <div class="profile-content">
+    
+    <!-- Pestaña: Resumen -->
+    <div *ngIf="activeTab === 'overview'" class="tab-content">
+      <div class="overview-grid">
+        
+        <!-- Información personal -->
+        <div class="info-card">
+          <h3>📋 Información Personal</h3>
+          <div class="info-item" *ngIf="user?.bio">
+            <strong>Bio:</strong>
+            <p>{{ user?.bio }}</p>
+          </div>
+          <div class="info-item" *ngIf="user?.location">
+            <strong>Ubicación:</strong>
+            <span>{{ user?.location }}</span>
+          </div>
+          <div class="info-item" *ngIf="user?.favoriteAuthor">
+            <strong>Autor favorito:</strong>
+            <span>{{ user?.favoriteAuthor }}</span>
+          </div>
+          <div class="info-item" *ngIf="user?.readingGoal">
+            <strong>Meta de lectura:</strong>
+            <span>{{ user?.readingGoal }} libros por año</span>
+          </div>
+        </div>
+
+        <!-- Progreso de lectura -->
+        <div class="reading-card">
+          <h3>📈 Progreso de Lectura</h3>
+          <div class="reading-goal">
+            <div class="goal-info">
+              <span>{{ favorites.length }} de {{ user?.readingGoal || 12 }} libros</span>
+              <span class="percentage">{{ getReadingGoalProgress() | number:'1.0-0' }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getReadingGoalProgress()"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categorías favoritas -->
+        <div class="categories-card">
+          <h3>📚 Categorías Favoritas</h3>
+          <div class="category-list">
+            <div *ngFor="let category of getTopCategories()" class="category-item">
+              <span class="category-name">{{ category }}</span>
+              <span class="category-count">{{ favoritesByCategory[category].length || 0 }} libros</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Últimos favoritos -->
+        <div class="recent-favorites">
+          <h3>❤️ Últimos Favoritos</h3>
+          <div class="recent-books" *ngIf="favorites.length > 0">
+            <div *ngFor="let book of favorites.slice(0, 4)" class="mini-book">
+              <img [src]="book.imageLinks?.thumbnail || 'assets/images/no-book-image.svg'" [alt]="book.title">
+              <span class="book-title">{{ book.title }}</span>
+            </div>
+          </div>
+          <p *ngIf="favorites.length === 0" class="no-favorites">
+            Aún no tienes libros favoritos. ¡Explora el catálogo!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Favoritos -->
+    <div *ngIf="activeTab === 'favorites'" class="tab-content">
+      <app-favorites-list></app-favorites-list>
+    </div>
+
+    <!-- Pestaña: Lectura -->
+    <div *ngIf="activeTab === 'reading'" class="tab-content">
+      <div class="reading-stats">
+        <h3>📊 Estadísticas de Lectura</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value">{{ getFavoritesCount() }}</div>
+            <div class="stat-label">Libros Favoritos</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value">{{ user?.readingGoal || 0 }}</div>
+            <div class="stat-label">Meta Anual</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value">{{ getReadingGoalProgress() | number:'1.0-0' }}%</div>
+            <div class="stat-label">Progreso</div>
+          </div>
+        </div>
+        
+        <!-- Gráfico de categorías -->
+        <div class="categories-chart">
+          <h4>📊 Distribución por Categorías</h4>
+          <div class="chart">
+            <div *ngFor="let category of getTopCategories()" class="chart-bar">
+              <div class="bar-label">{{ category }}</div>
+              <div class="bar-container">
+                <div 
+                  class="bar-fill" 
+                  [style.width.%]="(favoritesByCategory[category].length || 0) / getFavoritesCount() * 100">
+                </div>
+              </div>
+              <div class="bar-value">{{ favoritesByCategory[category].length || 0 }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Editar -->
+    <div *ngIf="activeTab === 'edit'" class="tab-content">
+      <app-edit-profile 
+        [user]="user" 
+        (profileUpdated)="onProfileUpdated()">
+      </app-edit-profile>
+    </div>
+  </div>
+</div>

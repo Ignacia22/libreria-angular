@@ -20,15 +20,23 @@ export class UserService {
   // ✅ PUBLIC: API del usuario
   login(email: string, name: string): Observable<User> {
     const user: User = {
-      id: this.generateUserId(),
-      name,
-      email,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=667eea&color=fff`,
-      preferences: {
-        favoriteGenres: [],
-        language: 'es'
-      }
-    };
+    id: this.generateUserId(),
+    name,
+    email,
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=667eea&color=fff`,
+    preferences: {
+      favoriteGenres: [],
+      language: 'es'
+    },
+    // ✅ NUEVAS PROPIEDADES:
+    joinDate: new Date(),
+    bio: '',
+    location: '',
+    birthDate: '',
+    phone: '',
+    readingGoal: 12, // 1 libro por mes por defecto
+    favoriteAuthor: ''
+  };
 
     this.userSubject.next(user);
     this.saveUserToStorage(user);
@@ -39,6 +47,19 @@ export class UserService {
   logout(): void {
     this.userSubject.next(null);
     this.clearUserFromStorage();
+  }
+
+  updateProfile(updates: Partial<User>): void {
+  const currentUser = this.userSubject.value;
+  if (!currentUser) return;
+
+  const updatedUser: User = {
+    ...currentUser,
+    ...updates
+  };
+
+  this.userSubject.next(updatedUser);
+  this.saveUserToStorage(updatedUser);
   }
 
   updatePreferences(favoriteGenres: string[], language: string = 'es'): void {

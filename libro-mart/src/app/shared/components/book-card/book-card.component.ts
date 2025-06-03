@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Book } from '../../../models/book.model';
 import { CartService } from '../../../core/services/cart.service';
 import { PriceService } from '../../../core/services/price.service';
+import { FavoritesService } from '../../../core/services/favorites.service';
 
 @Component({
   selector: 'app-book-card',
@@ -14,10 +15,12 @@ import { PriceService } from '../../../core/services/price.service';
 })
 export class BookCardComponent {
   @Input() book!: Book;
+  private hasErrored = false;
   
   constructor(
     private cartService: CartService,
-    private priceService: PriceService 
+    private priceService: PriceService,
+    private favoritesService: FavoritesService
   ) {}
 
   ngOnInit(): void {}
@@ -42,10 +45,15 @@ export class BookCardComponent {
     return this.book.authors.join(', ');
   }
 
+
   getImageUrl(): string {
+    if (this.hasErrored) {
+      return this.getDefaultImage();
+    }
+    
     return this.book.imageLinks?.thumbnail || 
            this.book.imageLinks?.smallThumbnail || 
-           'https://via.placeholder.com/128x196?text=Sin+Imagen';
+           this.getDefaultImage();
   }
 
   getRating(): number {
@@ -57,10 +65,39 @@ export class BookCardComponent {
     return Array(5).fill(false).map((_, i) => i < rating);
   }
 
+   // ✅ ARREGLAR: onImageError con protección
   onImageError(event: Event): void {
-  const target = event.target as HTMLImageElement;
-  if (target) {
-    target.src = 'https://via.placeholder.com/128x196?text=Sin+Imagen';
+    if (this.hasErrored) return; // ← Evitar bucle
+    
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      this.hasErrored = true;
+      target.src = this.getDefaultImage(); // ← Usar imagen segura
+    }
   }
-}
+
+  addToFavorites(): void {
+    this.favoritesService.addToFavorites(this.book);
+  }
+
+  removeFromFavorites(): void {
+    this.favoritesService.removeFromFavorites(this.book.id);
+  }
+
+  isInFavorites(): boolean {
+    return this.favoritesService.isInFavorites(this.book.id);
+  }
+
+  toggleFavorite(): void {
+    if (this.isInFavorites()) {
+      this.removeFromFavorites();
+    } else {
+      this.addToFavorites();
+    }
+  }
+
+  private getDefaultImage(): string {
+    // Imagen base64 embebida (nunca falla)
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjE5NiIgdmlld0JveD0iMCAwIDEyOCAxOTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTk2IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik01NCA4OEg3NFY5Nkg1NFY4OFoiIGZpbGw9IiM5Q0E0QUYiLz4KPHBhdGggZD0iTTQyIDEwOEg4NlYxMTZINDJWMTA4WiIgZmlsbD0iIzlDQTRBRiIvPgo8dGV4dCB4PSI2NCIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNkI3Mjg1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTAiPlNpbiBJbWFnZW48L3RleHQ+Cjwvc3ZnPg==';
+  }
 }

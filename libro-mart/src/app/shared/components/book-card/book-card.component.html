@@ -2,6 +2,16 @@
     <!-- Imagen del libro -->
   <div class="book-image">
     <img [src]="getImageUrl()" [alt]="book.title" (error)="onImageError($event)">
+
+    <!-- ✅ NUEVO: Botón de favoritos -->
+    <button 
+      (click)="toggleFavorite()" 
+      [class.favorited]="isInFavorites()"
+      class="btn-favorite"
+      title="{{ isInFavorites() ? 'Quitar de favoritos' : 'Agregar a favoritos' }}">
+      {{ isInFavorites() ? '❤️' : '🤍' }}
+    </button>
+    
     
     <!-- Badge de calificación -->
     <div class="rating-badge" *ngIf="getRating() > 0">

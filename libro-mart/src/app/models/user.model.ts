@@ -7,4 +7,13 @@ export interface User {
     favoriteGenres: string[];
     language: string;
   };
+  // ✅ NUEVAS PROPIEDADES:
+  bio?: string;
+  location?: string;
+  birthDate?: string;
+  phone?: string;
+  joinDate: Date;
+  readingGoal?: number; // Libros por año
+  favoriteAuthor?: string;
+  coverImage?: string
 }
