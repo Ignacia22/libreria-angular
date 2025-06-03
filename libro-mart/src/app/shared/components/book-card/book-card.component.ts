@@ -52,4 +52,11 @@ export class BookCardComponent {
     const rating = Math.round(this.getRating());
     return Array(5).fill(false).map((_, i) => i < rating);
   }
+
+  onImageError(event: Event): void {
+  const target = event.target as HTMLImageElement;
+  if (target) {
+    target.src = 'https://via.placeholder.com/128x196?text=Sin+Imagen';
+  }
+}
 }

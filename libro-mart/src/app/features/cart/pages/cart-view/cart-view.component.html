@@ -1,1 +1,96 @@
-<p>cart-view works!</p>
+<div class="cart-container">
+  <div class="cart-header">
+    <h1>🛒 Tu Carrito de Compras</h1>
+    <p *ngIf="cart.items.length > 0">Última actualización: {{ getFormattedDate() }}</p>
+  </div>
+
+  <!-- Carrito vacío -->
+  <div *ngIf="cart.items.length === 0" class="empty-cart">
+    <div class="empty-cart-icon">🛒</div>
+    <h2>Tu carrito está vacío</h2>
+    <p>Explora nuestro catálogo y encuentra libros increíbles</p>
+    <a routerLink="/books" class="btn-primary">Explorar Libros</a>
+  </div>
+
+  <!-- Carrito con items -->
+  <div *ngIf="cart.items.length > 0" class="cart-content">
+    
+    <!-- Lista de items -->
+    <div class="cart-items">
+      <div class="items-header">
+        <h2>Libros en tu carrito ({{ cart.itemCount }})</h2>
+        <button (click)="clearCart()" class="btn-clear">
+          🗑️ Vaciar carrito
+        </button>
+      </div>
+
+      <div class="items-list">
+        <app-cart-item 
+          *ngFor="let item of cart.items; trackBy: trackByItemId" 
+          [item]="item">
+        </app-cart-item>
+      </div>
+    </div>
+
+    <!-- Resumen del pedido -->
+    <div class="order-summary">
+      <div class="summary-card">
+        <h3>📋 Resumen del Pedido</h3>
+        
+        <div class="summary-line">
+          <span>Subtotal ({{ cart.itemCount }} libros):</span>
+          <span>${{ getSubtotal() | number:'1.2-2' }}</span>
+        </div>
+        
+        <div class="summary-line">
+          <span>Envío:</span>
+          <span *ngIf="getShipping() === 0" class="free-shipping">
+            ¡Gratis! 🎉
+          </span>
+          <span *ngIf="getShipping() > 0">
+            ${{ getShipping() | number:'1.2-2' }}
+          </span>
+        </div>
+        
+        <div class="summary-line">
+          <span>Impuestos:</span>
+          <span>${{ getTax() | number:'1.2-2' }}</span>
+        </div>
+        
+        <hr class="summary-divider">
+        
+        <div class="summary-total">
+          <span>Total:</span>
+          <span class="total-amount">${{ getTotal() | number:'1.2-2' }}</span>
+        </div>
+
+        <!-- Información de envío gratuito -->
+        <div *ngIf="getShipping() > 0 && (50 - getSubtotal()) > 0" class="shipping-info">
+          <p>💡 Agrega ${{ (50 - getSubtotal()) | number:'1.2-2' }} más para envío gratuito</p>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="summary-actions">
+          <button 
+            *ngIf="!isLoggedIn"
+            class="btn-login"
+            (click)="proceedToCheckout()">
+            Iniciar Sesión para Comprar
+          </button>
+          
+          <button 
+            *ngIf="isLoggedIn"
+            (click)="proceedToCheckout()" 
+            class="btn-checkout">
+            💳 Proceder al Pago
+          </button>
+          
+          <a routerLink="/books" class="btn-continue">
+            ← Seguir Comprando
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,1 +1,71 @@
-/* You can add global styles to this file, and also import other style files */
+/* TIPOGRAFÍAS GLOBALES */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Fuente para texto normal */
+  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  /* Fuente para títulos */
+  --font-heading: "Farro", sans-serif;
+  
+  /* Colores */
+  --primary-color: #667eea;
+  --text-color: #2c3e50;
+  --text-muted: #7f8c8d;
+}
+
+body {
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: #f8f9fa;
+  margin: 0;
+}
+
+/* TÍTULOS - Usar fuente elegante */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-color);
+}
+
+h1 { font-size: 2.5rem; font-weight: 700; }
+h2 { font-size: 2rem; font-weight: 600; }
+h3 { font-size: 1.5rem; font-weight: 600; }
+h4 { font-size: 1.25rem; font-weight: 500; }
+h5 { font-size: 1.1rem; font-weight: 500; }
+h6 { font-size: 1rem; font-weight: 500; }
+
+/* TEXTO - Usar fuente legible */
+p, span, div, a, button, input, textarea, select {
+  font-family: var(--font-body);
+}
+
+/* CLASES ESPECÍFICAS */
+.title-elegant {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.text-book-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.text-author {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.text-price {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.2rem;
+}

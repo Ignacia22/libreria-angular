@@ -1,1 +1,161 @@
-<p>book-detail works!</p>
+<div class="book-detail-container">
+  
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-section">
+    <div class="spinner"></div>
+    <p>Cargando información del libro...</p>
+  </div>
+
+  <!-- Libro no encontrado -->
+  <div *ngIf="notFound && !loading" class="not-found">
+    <div class="not-found-icon">📚</div>
+    <h2>Libro no encontrado</h2>
+    <p>Lo sentimos, no pudimos encontrar el libro que buscas.</p>
+    <button (click)="goBack()" class="btn-primary">Volver al Catálogo</button>
+  </div>
+
+  <!-- Detalles del libro -->
+  <div *ngIf="book && !loading" class="book-detail">
+    
+    <!-- Navegación -->
+    <div class="breadcrumb">
+      <button (click)="goBack()" class="btn-back">← Volver al catálogo</button>
+    </div>
+
+    <!-- Información principal -->
+    <div class="book-main">
+      
+      <!-- Imagen del libro -->
+      <div class="book-image-section">
+        <div class="main-image">
+          <img [src]="getImageUrl()" [alt]="book.title">
+        </div>
+        
+        <!-- Rating -->
+        <div class="rating-section" *ngIf="getRating() > 0">
+          <div class="stars">
+            <span *ngFor="let star of getStars()" [class.filled]="star">★</span>
+          </div>
+          <span class="rating-text">
+            {{ getRating() | number:'1.1-1' }} 
+            <span *ngIf="book.ratingsCount">({{ book.ratingsCount }} reseñas)</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Información del libro -->
+      <div class="book-info-section">
+        <div class="book-header">
+          <h1 class="book-title">{{ book.title }}</h1>
+          <p class="book-authors">por {{ getAuthors() }}</p>
+          
+          <!-- Categorías -->
+          <div class="book-categories">
+            <span *ngFor="let category of book.categories?.slice(0, 3)" class="category-tag">
+              {{ category }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Precio y acciones -->
+        <div class="purchase-section">
+          <div class="price-section">
+            <span class="price">${{ getPrice() | number:'1.2-2' }}</span>
+            <span class="currency">{{ getCurrency() }}</span>
+          </div>
+
+          <div class="quantity-section">
+            <label>Cantidad:</label>
+            <div class="quantity-controls">
+              <button (click)="updateQuantity(quantity - 1)" [disabled]="quantity <= 1">-</button>
+              <input [(ngModel)]="quantity" type="number" min="1" max="10" readonly>
+              <button (click)="updateQuantity(quantity + 1)" [disabled]="quantity >= 10">+</button>
+            </div>
+          </div>
+
+          <button 
+            (click)="addToCart()" 
+            [class.in-cart]="isInCart()"
+            class="btn-add-cart">
+            <span *ngIf="!isInCart()">🛒 Agregar al Carrito</span>
+            <span *ngIf="isInCart()">✅ En el Carrito</span>
+          </button>
+        </div>
+
+        <!-- Detalles técnicos -->
+        <div class="book-details">
+          <h3>📋 Detalles del Libro</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <strong>Páginas:</strong>
+              <span>{{ book.pageCount || 'No especificado' }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>Año de publicación:</strong>
+              <span>{{ getPublishedYear() }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>Idioma:</strong>
+              <span>{{ book.language || 'No especificado' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="book.isbn">
+              <strong>ISBN:</strong>
+              <span>{{ book.isbn }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="book-description">
+      <h3>📖 Descripción</h3>
+      <div class="description-content">
+        <p>{{ getShortDescription() }}</p>
+        
+        <button 
+          *ngIf="hasLongDescription()" 
+          class="btn-read-more"
+          (click)="showFullDescription = !showFullDescription">
+          {{ showFullDescription ? 'Leer menos' : 'Leer más' }}
+        </button>
+        
+        <div *ngIf="showFullDescription && hasLongDescription()" class="full-description">
+          <p>{{ getDescription() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ SECCIÓN DE RESEÑAS - NUEVA -->
+    <div class="reviews-section">
+      <!-- Escribir reseña -->
+      <app-write-review 
+        [bookId]="book.id" 
+        [bookTitle]="book.title"
+        (reviewSubmitted)="onReviewSubmitted()">
+      </app-write-review>
+
+      <!-- Mostrar reseñas -->
+      <app-book-reviews 
+        [bookId]="book.id">
+      </app-book-reviews>
+    </div>
+
+    <!-- Libros relacionados -->
+    <div *ngIf="relatedBooks.length > 0" class="related-books">
+      <h3>📚 Libros Relacionados</h3>
+      <div class="related-grid">
+        <div *ngFor="let relatedBook of relatedBooks" class="related-book">
+          <a [routerLink]="['/books', relatedBook.id]">
+            <img 
+              [src]="relatedBook.imageLinks?.thumbnail || 'https://via.placeholder.com/128x196?text=Sin+Imagen'" 
+              [alt]="relatedBook.title">
+            <h4>{{ relatedBook.title }}</h4>
+            <p>{{ relatedBook.authors.join(', ') }}</p>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

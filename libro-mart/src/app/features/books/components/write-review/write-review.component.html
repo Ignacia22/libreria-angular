@@ -1,0 +1,118 @@
+<div class="write-review-container">
+
+    <!-- Botón para mostrar/ocultar formulario -->
+  <div class="review-trigger">
+    <div *ngIf="!isLoggedIn" class="login-prompt">
+      <p>💡 <strong>Inicia sesión</strong> para escribir una reseña sobre este libro</p>
+    </div>
+    
+    <div *ngIf="isLoggedIn && !canWriteReview" class="already-reviewed">
+      <p>✅ Ya escribiste una reseña para este libro</p>
+    </div>
+    
+    <button 
+      *ngIf="canWriteReview" 
+      (click)="toggleForm()" 
+      class="btn-write-review"
+      [class.active]="showForm">
+      {{ showForm ? '❌ Cancelar' : '✍️ Escribir Reseña' }}
+    </button>
+  </div>
+
+  <!-- Formulario de reseña -->
+  <div *ngIf="showForm" class="review-form">
+    <div class="form-header">
+      <h3>✍️ Escribe tu reseña de "{{ bookTitle }}"</h3>
+      <p>Comparte tu experiencia con otros lectores</p>
+    </div>
+
+    <form (ngSubmit)="submitReview()" #reviewForm="ngForm">
+      
+      <!-- Rating con estrellas -->
+      <div class="rating-section">
+        <label>Calificación *</label>
+        <div class="star-rating">
+          <span 
+            *ngFor="let star of [1,2,3,4,5]" 
+            [class]="getStarClass(star)"
+            (click)="setRating(star)"
+            (mouseenter)="setHoveredRating(star)"
+            (mouseleave)="clearHoveredRating()">
+            ★
+          </span>
+          <span *ngIf="rating > 0" class="rating-text">
+            {{ rating }} de 5 estrellas
+          </span>
+        </div>
+      </div>
+
+      <!-- Título de la reseña -->
+      <div class="form-group">
+        <label for="reviewTitle">Título de tu reseña *</label>
+        <input 
+          type="text" 
+          id="reviewTitle"
+          [(ngModel)]="title"
+          name="title"
+          maxlength="100"
+          placeholder="Resumen de tu experiencia..."
+          class="form-input"
+          required>
+        <div class="char-counter">
+          {{ getRemainingChars('title') }} caracteres restantes
+        </div>
+        <div *ngIf="title.length > 0 && title.length < 5" class="error-text">
+          Mínimo 5 caracteres
+        </div>
+      </div>
+
+      <!-- Contenido de la reseña -->
+      <div class="form-group">
+        <label for="reviewContent">Tu reseña *</label>
+        <textarea 
+          id="reviewContent"
+          [(ngModel)]="content"
+          name="content"
+          maxlength="500"
+          rows="5"
+          placeholder="Cuéntanos qué te pareció el libro, qué te gustó, qué no te gustó..."
+          class="form-textarea"
+          required>
+        </textarea>
+        <div class="char-counter">
+          {{ getRemainingChars('content') }} caracteres restantes
+        </div>
+        <div *ngIf="content.length > 0 && content.length < 20" class="error-text">
+          Mínimo 20 caracteres
+        </div>
+      </div>
+
+      <!-- Información del usuario -->
+      <div class="user-info">
+        <img [src]="currentUser?.avatar" [alt]="currentUser?.name" class="user-avatar">
+        <div class="user-details">
+          <strong>{{ currentUser?.name }}</strong>
+          <span class="verified-badge">✅ Compra verificada</span>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          (click)="toggleForm()" 
+          class="btn-cancel">
+          Cancelar
+        </button>
+        
+        <button 
+          type="submit" 
+          [disabled]="!isFormValid() || isSubmitting"
+          class="btn-submit">
+          <span *ngIf="!isSubmitting">📝 Publicar Reseña</span>
+          <span *ngIf="isSubmitting">⏳ Enviando...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

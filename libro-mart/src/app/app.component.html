@@ -1,11 +1,11 @@
-<h1>LibroMart - Test API</h1>
-    <button (click)="testApi()">Buscar libros de Harry Potter</button>
-    
-    <div *ngFor="let book of books">
-      <h3>{{ book.title }}</h3>
-      <p>Autores: {{ book.authors.join(', ') }}</p>
-      <img *ngIf="book.imageLinks?.thumbnail" [src]="book.imageLinks.thumbnail" alt="">
-      <hr>
-    </div>
+<app-header></app-header>
 
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
 
+<footer class="main-footer">
+  <div class="footer-content">
+    <p>&copy; 2024 LibroMart. Hecho con ❤️ y Angular</p>
+  </div>
+</footer>
