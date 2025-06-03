@@ -1,0 +1,222 @@
+<div class="favorites-container">
+  
+  <!-- Header con búsqueda y filtros -->
+  <div class="favorites-header">
+    <div class="header-content">
+      <h2 class="favorites-title">❤️ Mis Libros Favoritos</h2>
+      <p class="favorites-subtitle" *ngIf="favorites.length > 0">
+        {{ favorites.length }} libro{{ favorites.length !== 1 ? 's' : '' }} en tu colección
+      </p>
+    </div>
+    
+    <!-- Barra de búsqueda y filtros -->
+    <div class="search-filters" *ngIf="favorites.length > 0">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Buscar en tus favoritos..." 
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          class="search-input">
+        <button 
+          *ngIf="searchQuery" 
+          (click)="clearSearch()" 
+          class="clear-search">
+          ✕
+        </button>
+      </div>
+      
+      <div class="filters">
+        <select 
+          [(ngModel)]="selectedCategory" 
+          (change)="onCategoryChange()" 
+          class="category-filter">
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+        
+        <select 
+          [(ngModel)]="sortBy" 
+          (change)="onSortChange()" 
+          class="sort-filter">
+          <option value="title">Ordenar por título</option>
+          <option value="author">Ordenar por autor</option>
+          <option value="dateAdded">Fecha agregado</option>
+          <option value="rating">Calificación</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="favorites.length === 0" class="empty-state">
+    <div class="empty-icon">📚</div>
+    <h3>Aún no tienes favoritos</h3>
+    <p>Explora nuestra biblioteca y agrega libros a tu colección personal</p>
+    <button routerLink="/search" class="explore-btn">
+      🔍 Explorar Libros
+    </button>
+  </div>
+
+  <!-- Estado sin resultados de búsqueda -->
+  <div *ngIf="favorites.length > 0 && filteredFavorites.length === 0" class="no-results">
+    <div class="no-results-icon">🔍</div>
+    <h3>No se encontraron resultados</h3>
+    <p>Intenta con otros términos de búsqueda o filtros diferentes</p>
+    <button (click)="clearFilters()" class="clear-filters-btn">
+      🗑️ Limpiar filtros
+    </button>
+  </div>
+
+  <!-- Lista de favoritos -->
+  <div *ngIf="filteredFavorites.length > 0" class="favorites-grid">
+    <div 
+      *ngFor="let book of filteredFavorites; trackBy: trackByBookId" 
+      class="favorite-card"
+      [class.removing]="removingBookIds.has(book.id)">
+      
+      <!-- Imagen del libro -->
+      <div class="book-image-container">
+        <img 
+          [src]="book.imageLinks?.thumbnail || 'assets/images/no-book-image.svg'" 
+          [alt]="book.title"
+          class="book-image"
+          loading="lazy">
+        
+        <!-- Overlay con acciones rápidas -->
+        <div class="book-overlay">
+          <button 
+            (click)="viewBookDetails(book)" 
+            class="action-btn view-btn"
+            title="Ver detalles">
+            👁️
+          </button>
+          <button 
+            (click)="removeFromFavorites(book)" 
+            class="action-btn remove-btn"
+            title="Quitar de favoritos"
+            [disabled]="removingBookIds.has(book.id)">
+            <span *ngIf="!removingBookIds.has(book.id)">💔</span>
+            <span *ngIf="removingBookIds.has(book.id)" class="loading-spinner">⏳</span>
+          </button>
+        </div>
+        
+        <!-- Badge de categoría -->
+        <div class="category-badge" *ngIf="book.categories && book.categories[0]">
+          {{ book.categories[0] }}
+        </div>
+      </div>
+
+      <!-- Información del libro -->
+      <div class="book-info">
+        <h3 class="book-title" [title]="book.title">{{ book.title }}</h3>
+        
+        <p class="book-author" *ngIf="book.authors && book.authors.length > 0">
+          <span class="author-icon">✍️</span>
+          {{ book.authors.join(', ') }}
+        </p>
+        
+        <!-- Rating si existe -->
+        <div class="book-rating" *ngIf="book.averageRating">
+          <div class="stars">
+            <span *ngFor="let star of getStarsArray(book.averageRating)" 
+                  [class]="star">⭐</span>
+          </div>
+          <span class="rating-text">{{ book.averageRating }}/5</span>
+        </div>
+        
+        <!-- Descripción corta -->
+        <p class="book-description" *ngIf="book.description">
+          {{ truncateDescription(book.description) }}
+        </p>
+        
+        <!-- Fecha cuando se agregó a favoritos -->
+        <div class="date-added">
+          <span class="date-icon">📅</span>
+          Agregado {{ getRelativeDate(book.dateAddedToFavorites) }}
+        </div>
+        
+        <!-- Acciones del libro -->
+        <div class="book-actions">
+          <button 
+            (click)="viewBookDetails(book)" 
+            class="action-button primary">
+            📖 Ver detalles
+          </button>
+          
+          <button 
+            (click)="shareBook(book)" 
+            class="action-button secondary">
+            📤 Compartir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación si hay muchos favoritos -->
+  <div *ngIf="totalPages > 1" class="pagination">
+    <button 
+      (click)="goToPage(currentPage - 1)" 
+      [disabled]="currentPage === 1"
+      class="page-btn prev-btn">
+      ← Anterior
+    </button>
+    
+    <div class="page-numbers">
+      <span *ngFor="let page of getPageNumbers()" 
+            [class.active]="page === currentPage"
+            [class.ellipsis]="page === '...'"
+            (click)="page !== '...' && goToPage(page)"
+            class="page-number">
+        {{ page }}
+      </span>
+    </div>
+    
+    <button 
+      (click)="goToPage(currentPage + 1)" 
+      [disabled]="currentPage === totalPages"
+      class="page-btn next-btn">
+      Siguiente →
+    </button>
+  </div>
+
+  <!-- Footer con estadísticas -->
+  <div *ngIf="favorites.length > 0" class="favorites-footer">
+    <div class="stats-summary">
+      <div class="stat-item">
+        <span class="stat-icon">📚</span>
+        <span class="stat-text">{{ favorites.length }} favoritos</span>
+      </div>
+      
+      <div class="stat-item" *ngIf="categories.length > 0">
+        <span class="stat-icon">🏷️</span>
+        <span class="stat-text">{{ categories.length }} categorías</span>
+      </div>
+      
+      <div class="stat-item" *ngIf="getAverageRating() > 0">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-text">{{ getAverageRating() | number:'1.1-1' }} promedio</span>
+      </div>
+    </div>
+    
+    <!-- Acciones masivas -->
+    <div class="bulk-actions">
+      <button 
+        (click)="exportFavorites()" 
+        class="bulk-action-btn">
+        📥 Exportar lista
+      </button>
+      
+      <button 
+        (click)="clearAllFavorites()" 
+        class="bulk-action-btn danger"
+        [disabled]="favorites.length === 0">
+        🗑️ Limpiar todo
+      </button>
+    </div>
+  </div>
+</div>

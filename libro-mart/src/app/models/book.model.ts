@@ -22,4 +22,7 @@ export interface Book {
   isbn?: string;
   pageCount?: number;
   language?: string;
+
+  // ✅ Nueva propiedad para favoritos
+  dateAddedToFavorites?: Date | string;
 }

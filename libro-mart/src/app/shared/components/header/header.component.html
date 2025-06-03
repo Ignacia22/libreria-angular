@@ -1,5 +1,5 @@
 <header class="main-header">
-    <div class="header-container">
+  <div class="header-container">
     <!-- Logo -->
     <div class="logo">
       <a routerLink="/books">
@@ -9,9 +9,24 @@
 
     <!-- Navegación -->
     <nav class="main-nav">
-      <a routerLink="/books" routerLinkActive="active">Catálogo</a>
-      <a routerLink="/cart" routerLinkActive="active">
-        Carrito 
+      <a routerLink="/books" routerLinkActive="active" class="nav-link">
+        📖 Catálogo
+      </a>
+      
+      <!-- Favoritos - Solo visible si está logueado -->
+      <a 
+        *ngIf="isLoggedIn$ | async" 
+        routerLink="/profile" 
+        routerLinkActive="active" 
+        class="nav-link favorites-link">
+        ❤️ Favoritos
+        <span class="favorites-badge" *ngIf="(favoritesCount$ | async) as count">
+          {{ count }}
+        </span>
+      </a>
+      
+      <a routerLink="/cart" routerLinkActive="active" class="nav-link cart-link">
+        🛒 Carrito 
         <span class="cart-badge" *ngIf="(cartItemCount$ | async) as count">
           {{ count }}
         </span>
@@ -21,7 +36,9 @@
     <!-- Usuario -->
     <div class="user-section">
       <div *ngIf="isLoggedIn$ | async; else loginSection" class="logged-in">
-        <span>¡Hola, {{ userName$ | async }}!</span>
+        <a routerLink="/profile" class="profile-link">
+          👤 {{ userName$ | async }}
+        </a>
         <button (click)="logout()" class="btn-secondary">Salir</button>
       </div>
       
@@ -29,5 +46,5 @@
         <button (click)="login()" class="btn-primary">Iniciar Sesión</button>
       </ng-template>
     </div>
-    </div>
+  </div>
 </header>

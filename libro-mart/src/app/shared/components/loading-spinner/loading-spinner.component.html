@@ -1,1 +1,8 @@
-<p>loading-spinner works!</p>
+@if (loading$ | async) {
+  <div class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
+    </div>
+  </div>
+}
