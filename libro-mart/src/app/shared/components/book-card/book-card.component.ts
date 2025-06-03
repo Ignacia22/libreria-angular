@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Book } from '../../../models/book.model';
 import { CartService } from '../../../core/services/cart.service';
+import { PriceService } from '../../../core/services/price.service';
 
 @Component({
   selector: 'app-book-card',
@@ -14,7 +15,10 @@ import { CartService } from '../../../core/services/cart.service';
 export class BookCardComponent {
   @Input() book!: Book;
   
-  constructor(private cartService: CartService) {}
+  constructor(
+    private cartService: CartService,
+    private priceService: PriceService 
+  ) {}
 
   ngOnInit(): void {}
 
@@ -27,7 +31,7 @@ export class BookCardComponent {
   }
 
   getPrice(): number {
-    return this.book.retailPrice?.amount || this.book.listPrice?.amount || 15.99;
+    return this.priceService.getBookPrice(this.book);
   }
 
   getCurrency(): string {

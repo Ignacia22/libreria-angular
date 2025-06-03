@@ -2,15 +2,21 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Cart, CartItem } from '../../models/cart.model';
 import { Book } from '../../models/book.model';
+import { PriceService } from './price.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
+  // ✅ Configuración chilena
+  private readonly FREE_SHIPPING_THRESHOLD = 20000; // $20.000 CLP
+  private readonly SHIPPING_COST = 3990;
+
+
   private cartSubject = new BehaviorSubject<Cart>(this.getInitialCart()); // El "estado interno" del carrito (privado)
   public cart$ = this.cartSubject.asObservable(); // La "ventana pública" para que otros componentes vean el carrito
 
-  constructor() { 
+  constructor(private priceService: PriceService) { 
     this.loadCartFromStorage(); // Cargar carrito guardado al iniciar
   }
 
@@ -78,6 +84,22 @@ export class CartService {
     return this.cartSubject.value.total;
   }
 
+  // ✅ NUEVO: Obtener costo de envío
+  getShippingCost(subtotal: number): number {
+    return subtotal >= this.FREE_SHIPPING_THRESHOLD ? 0 : this.SHIPPING_COST;
+  }
+
+  // ✅ NUEVO: Verificar si califica para envío gratis
+  qualifiesForFreeShipping(subtotal: number): boolean {
+    return subtotal >= this.FREE_SHIPPING_THRESHOLD;
+  }
+
+  // ✅ NUEVO: Cuánto falta para envío gratis
+  getAmountForFreeShipping(subtotal: number): number {
+    if (this.qualifiesForFreeShipping(subtotal)) return 0;
+    return this.FREE_SHIPPING_THRESHOLD - subtotal;
+  }
+
   // 🔒 PRIVATE: Helpers internos
   private updateCart(cart: Cart): void {
     // Recalcular totales
@@ -93,9 +115,9 @@ export class CartService {
   }
 
   private calculateTotal(items: CartItem[]): number {
-    return items.reduce((total, item) => {   // Para cada item:
-      const price = item.book.retailPrice?.amount || item.book.listPrice?.amount || 0;  // Obtener precio
-      return total + (price * item.quantity);  // Sumar al total
+    return items.reduce((total, item) => {
+      const price = this.priceService.getBookPrice(item.book); 
+      return total + (price * item.quantity);
     }, 0);
   }
 

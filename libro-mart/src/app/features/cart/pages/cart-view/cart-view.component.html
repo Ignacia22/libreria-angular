@@ -39,7 +39,7 @@
         
         <div class="summary-line">
           <span>Subtotal ({{ cart.itemCount }} libros):</span>
-          <span>${{ getSubtotal() | number:'1.2-2' }}</span>
+          <span>${{ getSubtotal() | number:'1.0-0' }}</span>
         </div>
         
         <div class="summary-line">
@@ -48,25 +48,28 @@
             ¡Gratis! 🎉
           </span>
           <span *ngIf="getShipping() > 0">
-            ${{ getShipping() | number:'1.2-2' }}
+            ${{ getShipping() | number:'1.0-0' }}
           </span>
-        </div>
-        
-        <div class="summary-line">
-          <span>Impuestos:</span>
-          <span>${{ getTax() | number:'1.2-2' }}</span>
         </div>
         
         <hr class="summary-divider">
         
         <div class="summary-total">
           <span>Total:</span>
-          <span class="total-amount">${{ getTotal() | number:'1.2-2' }}</span>
+          <span class="total-amount">${{ getTotal() | number:'1.0-0' }}</span>
         </div>
 
-        <!-- Información de envío gratuito -->
-        <div *ngIf="getShipping() > 0 && (50 - getSubtotal()) > 0" class="shipping-info">
-          <p>💡 Agrega ${{ (50 - getSubtotal()) | number:'1.2-2' }} más para envío gratuito</p>
+        <!-- Información de envío gratuito chileno -->
+        <div *ngIf="!qualifiesForFreeShipping()" class="shipping-info">
+          <p>🚚 Agrega ${{ getAmountForFreeShipping() | number:'1.0-0' }} más para envío gratuito</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(getSubtotal() / 20000) * 100"></div>
+          </div>
+          <small>Envío gratuito en compras sobre $20.000</small>
+        </div>
+
+        <div *ngIf="qualifiesForFreeShipping()" class="free-shipping-achieved">
+          <p>🎉 ¡Felicidades! Tu pedido califica para envío gratuito</p>
         </div>
 
         <!-- Botones de acción -->
